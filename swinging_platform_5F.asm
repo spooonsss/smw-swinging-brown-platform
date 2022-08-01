@@ -465,7 +465,7 @@ CMP $0E		;
 BCS Return00	;
 LDA $7D		;
 BMI Label01	;
-STZ $7D		;
+STZ $7D		; on the platform here
 LDA #$03		;
 STA $1471|!Base2	;
 STA !1602,x	;
@@ -478,7 +478,7 @@ STA $0F		;
 LDA $14BA|!Base2	;
 SEC		;
 SBC $0F		;
-STA $96		;
+STA $96		; place mario on top
 LDA $14BB|!Base2	;
 SBC #$00		;
 STA $97		;
@@ -509,10 +509,32 @@ BCC Return01	;
 LDA !151C,x	;
 CLC		;
 ADC #$80	;
+BEQ Centered ; straight up or down
 LDA !1528,x	;
 ADC #$00	;
-AND #$01	;
+AND #$01	;  this is where it chooses direction
+; LDA #$00 ; this is clockwise
 TAY		;
+BRA Skip_centered
+
+Centered:
+; which side is mario on
+LDA !14E0,x
+XBA
+LDA !E4,x
+REP #$20
+SEC
+SBC #$0078-($40/2) ; "offset the sprite 78 pixels to the right", platform is $40 wide
+SBC $94
+SEP #$20
+
+LDY #$00
+BCC +
+INY
++
+
+
+Skip_centered:
 LDA !1504,x	;
 CMP Data3,y	;
 BEQ Return01	;
